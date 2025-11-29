@@ -1,0 +1,13 @@
+{
+	"folders": [
+		{
+			"name": "components",
+			"path": "../../MowgliSheetMusic/components"
+		},
+		{
+			"name": "MusicalHangmanAndMore",
+			"path": ".."
+		}
+	],
+	"settings": {}
+}
