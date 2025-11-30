@@ -1,79 +1,111 @@
-import { useNavigation, useRoute } from '@react-navigation/native';
+// app/Search.js   ← Using react-native-elements SearchBar + full background
+
+import { useLocalSearchParams, useRouter } from "expo-router";
 import React, { useState } from "react";
-import { FlatList, ImageBackground, StyleSheet, Text, TouchableOpacity, View } from "react-native";
-import { TextInput } from 'react-native-paper';
-import bgImage from './assets/image.jpg'; // ← your background image
-import songEntries from './Data1';
+import {
+    FlatList,
+    ImageBackground,
+    StyleSheet,
+    Text,
+    TouchableOpacity,
+    View
+} from "react-native";
+import { Icon, SearchBar } from "react-native-elements";
+import bgImage from "./assets/image.jpg";
+import songEntries from "./Data1";
 
-function sortAndReassignIds(entries) {
-    entries.sort((a, b) => a.title.localeCompare(b.title));
-    entries.forEach((entry, index) => {
-        entry.id = (index + 1).toString();
-    });
-    return entries;
-}
-
-const sortedSongEntries = sortAndReassignIds(songEntries);
-
-const ItemSeparatorView = () => (
-    <View style={{ height: 0.5, width: '95%', backgroundColor: 'black' }} />
-);
+// Sort songs once
+const sortedSongEntries = [...songEntries]
+    .sort((a, b) => a.title.localeCompare(b.title))
+    .map((song, index) => ({ ...song, id: String(index + 1) }));
 
 export default function Search() {
-    const navigation = useNavigation();
-    const route = useRoute();
-    const category = route?.params?.category;
+    const router = useRouter();
+    const { category } = useLocalSearchParams();
 
-    const initialFiltered =
+    const initialList =
         category && category !== "Show All"
             ? sortedSongEntries.filter((s) => s.category === category)
             : sortedSongEntries;
 
-    const [songEntriesState, setSongEntriesState] = useState(initialFiltered);
     const [searchValue, setSearchValue] = useState("");
-    const arrayHolder = initialFiltered;
+    const [filteredSongs, setFilteredSongs] = useState(initialList);
+    const backupList = initialList;
 
-    const searchFunction = (text) => {
-        const updatedData = arrayHolder.filter((item) => {
-            const item_data = `${item.title.toUpperCase()}`;
-            const text_data = text.toUpperCase();
-            return item_data.indexOf(text_data) > -1;
-        });
-        setSongEntriesState(updatedData);
+    const handleSearch = (text) => {
         setSearchValue(text);
+        if (!text.trim()) {
+            setFilteredSongs(backupList);
+            return;
+        }
+        const filtered = backupList.filter((item) =>
+            item.title.toUpperCase().includes(text.toUpperCase())
+        );
+        setFilteredSongs(filtered);
     };
 
-    const getItem = (item) => {
-        navigation.navigate('SheetMusic', { title: item.title, category: item.category });
+    const clearSearch = () => {
+        setSearchValue("");
+        setFilteredSongs(backupList);
+    };
+
+    const openSheet = (item) => {
+        router.push({
+            pathname: "/SheetMusic",
+            params: { title: item.title, category: item.category },
+        });
     };
 
     const renderItem = ({ item }) => (
-        <TouchableOpacity onPress={() => getItem(item)}>
-            <Text style={styles.item}>{item.title.toUpperCase()}</Text>
-            <Text style={styles.itemSubtitle}>{item.category}</Text>
+        <TouchableOpacity onPress={() => openSheet(item)} style={styles.item}>
+            <Text style={styles.title}>{item.title.toUpperCase()}</Text>
+            {item.category && <Text style={styles.subtitle}>{item.category}</Text>}
         </TouchableOpacity>
     );
 
     return (
-        <ImageBackground source={bgImage} style={styles.background}>
+        <ImageBackground source={bgImage} style={styles.background} resizeMode="cover">
             <View style={styles.overlay}>
-                <TextInput
-                    placeholder="Search Here..."
-                    darkTheme
-                    round
+                {/* react-native-elements SearchBar — beautiful & dark */}
+                {/* react-native-elements SearchBar — beautiful & dark, NO QUESTION MARK */}
+                <SearchBar
+                    placeholder="Search songs..."
                     value={searchValue}
-                    onChangeText={searchFunction}
-                    autoCorrect={false}
-                    keyboardType={'ascii-capable'}
-                    style={styles.input}
+                    onChangeText={handleSearch}
+                    onClear={clearSearch}
+                    platform="ios"
+                    round
+                    lightTheme={false}
+                    showLoading={false}           // Keeps loading spinner hidden
+                    loadingProps={{}}             // Keeps loading spinner hidden
+                    containerStyle={styles.searchContainer}
+                    inputContainerStyle={styles.inputContainer}
+                    inputStyle={styles.input}
+                    placeholderTextColor="#aaa"
+
+                    // ← THIS FIXES THE QUESTION MARK: Custom search icon component
+                    searchIcon={
+                        () => (
+                            <Icon
+                                name="search"
+                                type="material"
+                                color="#FF6B4A"
+                                size={26}
+                            />
+                        )
+                    }
+
+                    clearIcon={{ color: "#FF6B4A", size: 26 }}
+                    cancelIcon={{ color: "#FF6B4A" }}
                 />
+
                 <FlatList
-                    data={songEntriesState}
+                    data={filteredSongs}
                     renderItem={renderItem}
                     keyExtractor={(item) => item.id}
-                    ItemSeparatorComponent={ItemSeparatorView}
-                    ListFooterComponent={<View style={{ height: 40 }} />}
-                    contentContainerStyle={{ paddingBottom: 40 }}
+                    ItemSeparatorComponent={() => <View style={styles.separator} />}
+                    contentContainerStyle={styles.list}
+                    showsVerticalScrollIndicator={false}
                 />
             </View>
         </ImageBackground>
@@ -81,32 +113,53 @@ export default function Search() {
 }
 
 const styles = StyleSheet.create({
-    background: { flex: 1, width: '100%', height: '100%' },
+    background: { flex: 1 },
     overlay: {
         flex: 1,
-        backgroundColor: 'hsla(14, 90%, 10%, 0.40)', // semi-transparent overlay so text is readable
-        paddingTop: 30,
-        paddingHorizontal: 10,
+        backgroundColor: "rgba(0,0,0,0.52)",
+        paddingTop: 40,
+    },
+    searchContainer: {
+        backgroundColor: "transparent",
+        borderTopWidth: 0,
+        borderBottomWidth: 0,
+        paddingHorizontal: 15,
+    },
+    inputContainer: {
+        backgroundColor: "#1a1a1a",
+        borderRadius: 30,
+        height: 50,
     },
     input: {
-        marginBottom: 10,
+        color: "#fff",
+        fontSize: 17,
     },
     item: {
-        textAlign: 'center',
-        color: 'white',
-        fontSize: 18,
-        fontWeight: 'bold',
-        textShadowColor: 'black',
-        textShadowOffset: { width: 1, height: 1 },
-        textShadowRadius: 1,
+        paddingVertical: 18,
+        alignItems: "center",
     },
-    itemSubtitle: {
-        textAlign: 'center',
-        color: '#ddd',
-        fontSize: 16,
-        marginTop: 4,
-        textShadowColor: 'black',
+    title: {
+        color: "#fff",
+        fontSize: 20,
+        fontWeight: "bold",
+        textAlign: "center",
+        textShadowColor: "rgba(0,0,0,0.9)",
         textShadowOffset: { width: 1, height: 1 },
-        textShadowRadius: 1,
+        textShadowRadius: 5,
+    },
+    subtitle: {
+        color: "#FF8C70",
+        fontSize: 15,
+        marginTop: 5,
+    },
+    separator: {
+        height: 1,
+        width: "90%",
+        alignSelf: "center",
+        backgroundColor: "#555",
+        opacity: 0.4,
+    },
+    list: {
+        paddingBottom: 120,
     },
 });

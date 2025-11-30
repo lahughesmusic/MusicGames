@@ -1,6 +1,27 @@
-export default function SearchScreen({ navigation, route }) {
+import { useNavigation, useRoute } from '@react-navigation/native';
+import React, { useEffect } from 'react';
+import { FlatList, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { SearchBar } from 'react-native-paper'; // or your existing SearchBar
+import sortedSongEntries from './Data1'; // make sure this is sorted already
+
+const ItemSeparatorView = () => (
+    <View style={{ height: 0.5, width: '95%', backgroundColor: 'black' }} />
+);
+
+export default function SearchScreen() {
+    const navigation = useNavigation();
+    const route = useRoute();
     const category = route?.params?.category;
-    console.log("Category received from FilterScreen:", category);
+
+    useEffect(() => {
+        navigation.setOptions({
+            headerStyle: { backgroundColor: 'black' },
+            headerTintColor: '#FF6B4A',
+            headerTitleStyle: { fontWeight: 'bold' },
+            headerBackTitleVisible: false, // hides iOS back text
+            title: 'Search', // header title
+        });
+    }, [navigation]);
 
     const filtered =
         category && category !== "Show All"
@@ -22,7 +43,7 @@ export default function SearchScreen({ navigation, route }) {
 
     const getItem = (item) => {
         navigation.navigate("SheetMusic", {
-            Songs: item.title,
+            title: item.title,
             category: item.category,
         });
     };
@@ -34,7 +55,7 @@ export default function SearchScreen({ navigation, route }) {
                 darkTheme
                 round
                 value={searchValue}
-                onChangeText={(text) => searchFunction(text)}
+                onChangeText={searchFunction}
                 autoCorrect={false}
                 keyboardType="ascii-capable"
             />
@@ -52,3 +73,27 @@ export default function SearchScreen({ navigation, route }) {
         </View>
     );
 }
+
+const styles = StyleSheet.create({
+    container: {
+        flex: 1,
+        backgroundColor: 'hsla(14, 90%, 10%, 0.40)',
+        paddingTop: 10,
+    },
+    item: {
+        textAlign: 'center',
+        color: 'white',
+        fontSize: 18,
+        fontWeight: 'bold',
+        textShadowColor: 'black',
+        textShadowOffset: { width: 1, height: 1 },
+        textShadowRadius: 1,
+        paddingVertical: 5,
+    },
+    itemSubtitle: {
+        textAlign: 'center',
+        color: '#ddd',
+        fontSize: 16,
+        marginBottom: 5,
+    },
+});

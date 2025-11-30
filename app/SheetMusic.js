@@ -19,6 +19,7 @@ export default function SheetMusic() {
     const { title, category } = useLocalSearchParams();
     const { width, height } = useWindowDimensions();
 
+    // Force landscape orientation
     useFocusEffect(
         useCallback(() => {
             ScreenOrientation.lockAsync(ScreenOrientation.OrientationLock.LANDSCAPE);

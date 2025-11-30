@@ -1,35 +1,31 @@
-import React, { useState, useEffect } from 'react';
+// MusicalHangman.js
+import { useFocusEffect } from '@react-navigation/native';
+import * as ScreenOrientation from 'expo-screen-orientation';
+import React, { useCallback, useEffect, useState } from 'react';
 import {
-    View,
-    Text,
-    StyleSheet,
     Alert,
-    Image,
     Dimensions,
-    ScrollView,
+    Image,
     ImageBackground,
-    TouchableOpacity,
     Platform,
+    ScrollView,
+    StyleSheet,
+    Text,
+    TouchableOpacity,
+    View
 } from 'react-native';
-import wordsData from './words.json';
 import noteImages from './helperMap';
 import cardBackground from './NewBackgroundCardTemplate.png';
-import * as ScreenOrientation from 'expo-screen-orientation';
-import { useFocusEffect } from '@react-navigation/native';
+import wordsData from './words.json';
 
 const musicalAlphabet = ['a', 'b', 'c', 'd', 'e', 'f', 'g'];
 
 const { width, height } = Dimensions.get('window');
 const screenLongSide = Math.max(width, height);
 const screenShortSide = Math.min(width, height);
-
 const isAndroid = Platform.OS === 'android';
-const isAndroidTablet = Platform.OS === 'android' && screenShortSide >= 600;
-
-const isIpad =
-    Platform.OS === 'ios' &&
-    (Platform.isPad || (screenShortSide >= 768 && screenLongSide >= 1024));
-
+const isAndroidTablet = isAndroid && screenShortSide >= 600;
+const isIpad = Platform.OS === 'ios' && (Platform.isPad || (screenShortSide >= 768 && screenLongSide >= 1024));
 const isSmallIphone = Platform.OS === 'ios' && screenShortSide < 400;
 
 const rawScale = screenLongSide / 375;
@@ -40,22 +36,36 @@ const scale = isIpad || isAndroidTablet
         : isAndroid
             ? Math.max(Math.min(rawScale * 0.9, 3), 0.9)
             : Math.max(Math.min(rawScale, 3), 1);
-const colors = ['#4EEAF6', '#FF6B4A', '#AEE637',]
+
+const colors = ['#4EEAF6', '#FF6B4A', '#AEE637'];
 
 export default function MusicalHangman() {
-    useFocusEffect(
-        React.useCallback(() => {
-            ScreenOrientation.lockAsync(ScreenOrientation.OrientationLock.LANDSCAPE);
-            return undefined;
-        }, [])
-    );
-
     const [word, setWord] = useState('');
     const [guesses, setGuesses] = useState([]);
     const [randomImages, setRandomImages] = useState({});
     const [activeInputIndex, setActiveInputIndex] = useState(null);
     const [gameWon, setGameWon] = useState(false);
     const [lastWord, setLastWord] = useState('');
+    const [textColor, setTextColor] = useState('#FFD93D');
+    const [orientationHack, setOrientationHack] = useState(0); // iOS fix
+
+    // ============ FORCE LANDSCAPE (WORKS 100%) ============
+    useFocusEffect(
+        useCallback(() => {
+            // Lock to landscape (both directions allowed)
+            ScreenOrientation.lockAsync(ScreenOrientation.OrientationLock.LANDSCAPE)
+                .then(() => {
+                    // Tiny hack: forces iOS to respect the rotation immediately
+                    setOrientationHack(prev => prev + 1);
+                })
+                .catch(err => console.warn('Orientation lock failed:', err));
+
+            // When leaving this screen → go back to portrait
+            return () => {
+                ScreenOrientation.lockAsync(ScreenOrientation.OrientationLock.PORTRAIT_UP);
+            };
+        }, [])
+    );
 
     const loadNewWord = () => {
         const wordList = wordsData.wordsData;
@@ -75,8 +85,8 @@ export default function MusicalHangman() {
             }
         });
 
-        const guessesInit = lowerWord.split('').map((letter) =>
-            musicalAlphabet.includes(letter) ? '' : letter.toLowerCase()
+        const guessesInit = lowerWord.split('').map(letter =>
+            musicalAlphabet.includes(letter) ? '' : letter
         );
 
         setWord(lowerWord);
@@ -88,11 +98,6 @@ export default function MusicalHangman() {
 
     useEffect(() => {
         loadNewWord();
-    }, []);
-
-    const [textColor, setTextColor] = useState('#FFD93D');
-    useEffect(() => {
-        // Pick a random color on mount
         const randomColor = colors[Math.floor(Math.random() * colors.length)];
         setTextColor(randomColor);
     }, []);
@@ -101,14 +106,13 @@ export default function MusicalHangman() {
         if (word && guesses.join('') === word && !gameWon) {
             setGameWon(true);
             setTimeout(() => {
-                Alert.alert('🎉 Congratulations!', 'You solved the word!', [
-                    { text: 'Next Word', onPress: () => loadNewWord() },
+                Alert.alert('Congratulations!', 'You solved the word!', [
+                    { text: 'Next Word', onPress: loadNewWord },
                     { text: 'OK', style: 'cancel' },
                 ]);
-            }, 2000); // 2 second delay
+            }, 2000);
         }
-    }, [guesses, word]);
-
+    }, [guesses, word, gameWon]);
 
     const handleInputTap = (index) => {
         if (musicalAlphabet.includes(word[index])) {
@@ -119,8 +123,7 @@ export default function MusicalHangman() {
     const handleLetterSelect = (letter) => {
         if (activeInputIndex === null) return;
 
-        const isCorrect = word[activeInputIndex] === letter;
-        if (!isCorrect) {
+        if (word[activeInputIndex] !== letter) {
             Alert.alert('Incorrect', 'Try again!');
             return;
         }
@@ -171,10 +174,9 @@ export default function MusicalHangman() {
 
     const renderLetterOptions = () => (
         <View style={styles.buttonGridWrapper}>
-            <Text style={[styles.pickMe, { color: textColor }]}>
-                PICK A NOTE!</Text>
+            <Text style={[styles.pickMe, { color: textColor }]}>PICK A NOTE!</Text>
             <View style={styles.buttonGrid}>
-                {musicalAlphabet.map((letter) => (
+                {musicalAlphabet.map(letter => (
                     <TouchableOpacity
                         key={letter}
                         style={styles.letterButton}
@@ -190,7 +192,7 @@ export default function MusicalHangman() {
     return (
         <ImageBackground
             source={cardBackground}
-            style={styles.cardBackground}
+            style={[styles.cardBackground, { opacity: orientationHack ? 1 : 1 }]} // iOS hack
             resizeMode="stretch"
         >
             <ScrollView contentContainerStyle={styles.scrollContainer}>
@@ -204,52 +206,26 @@ export default function MusicalHangman() {
 }
 
 const styles = StyleSheet.create({
-    cardBackground: {
-        flex: 1,
-        width: '100%',
-        height: '100%',
-        justifyContent: 'flex-start',
-    },
+    cardBackground: { flex: 1, width: '100%', height: '100%' },
     scrollContainer: {
         flexGrow: 1,
         justifyContent: 'flex-start',
         alignItems: 'center',
-        paddingTop: isAndroidTablet ? 20 * scale : (isAndroid ? 4 * scale : 8 * scale),
+        paddingTop: isAndroidTablet ? 20 * scale : isAndroid ? 4 * scale : 8 * scale,
         paddingBottom: 24 * scale,
     },
     pickMe: {
         fontSize: 16 * scale,
-        fontFamily: "Roboto-Light",
+        fontFamily: 'Roboto-Light',
         marginTop: 4 * scale,
         marginBottom: 6 * scale,
         textAlign: 'center',
     },
-    wordWrapper: {
-        alignItems: 'center',
-    },
-    columnRow: {
-        flexDirection: 'row',
-        justifyContent: 'center',
-        alignItems: 'flex-end',
-        marginBottom: 2 * scale,
-    },
-    columnWrapper: {
-        alignItems: 'center',
-        marginHorizontal: 3 * scale,
-        ...(isAndroid && { marginBottom: -3 * scale }),
-    },
-    noteImage: {
-        width: 30 * scale,
-        height: 50 * scale,
-        resizeMode: 'contain',
-        marginBottom: isAndroid ? 0 : 1 * scale,
-    },
-    noteImagePlaceholder: {
-        width: 30 * scale,
-        height: 50 * scale,
-        backgroundColor: 'transparent',
-        marginBottom: isAndroid ? 0 : 1 * scale,
-    },
+    wordWrapper: { alignItems: 'center' },
+    columnRow: { flexDirection: 'row', justifyContent: 'center', alignItems: 'flex-end', marginBottom: 2 * scale },
+    columnWrapper: { alignItems: 'center', marginHorizontal: 3 * scale, ...(isAndroid && { marginBottom: -3 * scale }) },
+    noteImage: { width: 30 * scale, height: 50 * scale, resizeMode: 'contain', marginBottom: isAndroid ? 0 : 1 * scale },
+    noteImagePlaceholder: { width: 30 * scale, height: 50 * scale, backgroundColor: 'transparent', marginBottom: isAndroid ? 0 : 1 * scale },
     displayInput: {
         width: 24 * scale,
         height: 20 * scale,
@@ -261,26 +237,10 @@ const styles = StyleSheet.create({
         backgroundColor: '#fff',
         marginTop: Platform.OS === 'android' ? 0 : 1 * scale,
     },
-    activeInput: {
-        borderColor: '#00f',
-        backgroundColor: '#ddf',
-    },
-    displayInputText: {
-        fontSize: 14 * scale,
-        fontWeight: 'bold',
-        textAlign: 'center',
-        color: '#000',
-    },
-    buttonGridWrapper: {
-        marginTop: 6 * scale,
-        alignItems: 'center',
-    },
-    buttonGrid: {
-        flexDirection: 'row',
-        flexWrap: 'wrap',
-        justifyContent: 'center',
-        gap: 4 * scale,
-    },
+    activeInput: { borderColor: '#00f', backgroundColor: '#ddf' },
+    displayInputText: { fontSize: 14 * scale, fontWeight: 'bold', textAlign: 'center', color: '#000' },
+    buttonGridWrapper: { marginTop: 6 * scale, alignItems: 'center' },
+    buttonGrid: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'center', gap: 4 * scale },
     letterButton: {
         backgroundColor: '#fff',
         borderWidth: 1.5,
@@ -291,16 +251,5 @@ const styles = StyleSheet.create({
         marginHorizontal: 1 * scale,
         marginVertical: 1 * scale,
     },
-    letterButtonText: {
-        fontSize: 12 * scale,
-        fontWeight: 'bold',
-        color: '#000',
-    },
-    divider: {
-        height: 2,             // thickness of the line
-        width: '60%',          // length of the line
-        backgroundColor: '#FF6B4A', // matches your text color
-        marginVertical: 10,    // spacing between lines
-    },
+    letterButtonText: { fontSize: 12 * scale, fontWeight: 'bold', color: '#000' },
 });
-
