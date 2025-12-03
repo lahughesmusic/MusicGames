@@ -1,5 +1,5 @@
-// Search.tsx
-import { HeaderBackButton } from '@react-navigation/elements'; // Back button
+
+import { HeaderBackButton } from '@react-navigation/elements';
 import { useFocusEffect } from '@react-navigation/native';
 import { useLocalSearchParams, useRouter } from "expo-router";
 import * as ScreenOrientation from 'expo-screen-orientation';
@@ -16,7 +16,7 @@ import { Icon, SearchBar } from "react-native-elements";
 import bgImage from "./assets/image.jpg";
 import songEntries from "./Data1";
 
-// Sort songs once
+
 const sortedSongEntries = [...songEntries]
     .sort((a, b) => a.title.localeCompare(b.title))
     .map((song, index) => ({ ...song, id: String(index + 1) }));
@@ -25,7 +25,7 @@ export default function Search() {
     const router = useRouter();
     const { category } = useLocalSearchParams();
 
-    // Force portrait mode whenever this screen is focused
+
     useFocusEffect(
         useCallback(() => {
             ScreenOrientation.lockAsync(ScreenOrientation.OrientationLock.PORTRAIT_UP);
@@ -76,14 +76,14 @@ export default function Search() {
     return (
         <ImageBackground source={bgImage} style={styles.background} resizeMode="cover">
             <View style={styles.overlay}>
-                {/* Back button */}
+
                 <HeaderBackButton
                     tintColor="#FF6B4A"
                     onPress={() => router.back()}
                     style={{ marginLeft: 10, marginBottom: 10 }}
                 />
 
-                {/* Search bar */}
+
                 <SearchBar
                     placeholder="Search songs..."
                     value={searchValue}
@@ -92,8 +92,8 @@ export default function Search() {
                     platform="ios"
                     round
                     lightTheme={false}
-                    showLoading={false}           // Keeps loading spinner hidden
-                    loadingProps={{}}             // Keeps loading spinner hidden
+                    showLoading={false}
+                    loadingProps={{}}
                     containerStyle={styles.searchContainer}
                     inputContainerStyle={styles.inputContainer}
                     inputStyle={styles.input}

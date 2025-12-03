@@ -18,7 +18,7 @@ export default function FilterScreen({ navigation }) {
     const { width } = useWindowDimensions();
     const isTablet = width >= 768;
 
-    // Lock portrait mode
+
     useFocusEffect(
         React.useCallback(() => {
             ScreenOrientation.lockAsync(ScreenOrientation.OrientationLock.PORTRAIT_UP);
@@ -97,6 +97,6 @@ const styles = StyleSheet.create({
         width: '60%',
         backgroundColor: '#FF6B4A',
         marginVertical: 50,
-        alignSelf: 'center', // centers the divider
+        alignSelf: 'center',
     },
 });

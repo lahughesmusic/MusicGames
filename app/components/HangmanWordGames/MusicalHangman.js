@@ -1,4 +1,4 @@
-// MusicalHangman.js
+
 import { useFocusEffect } from '@react-navigation/native';
 import * as ScreenOrientation from 'expo-screen-orientation';
 import { StatusBar } from 'expo-status-bar';
@@ -48,10 +48,8 @@ export default function MusicalHangman() {
     const [lastWord, setLastWord] = useState('');
     const [textColor, setTextColor] = useState('#FFD93D');
 
-    // NEW — block render until orientation fully locked
     const [orientationReady, setOrientationReady] = useState(false);
 
-    // -------------- FIXED ORIENTATION HANDLING -----------------
     useFocusEffect(
         useCallback(() => {
             let isActive = true;
@@ -60,7 +58,7 @@ export default function MusicalHangman() {
                 try {
                     await ScreenOrientation.lockAsync(ScreenOrientation.OrientationLock.LANDSCAPE);
 
-                    // iPadOS + TestFlight require a small delay before layout becomes stable
+
                     setTimeout(() => {
                         if (isActive) setOrientationReady(true);
                     }, 150);
@@ -75,13 +73,12 @@ export default function MusicalHangman() {
 
             return () => {
                 isActive = false;
-                // Unlock on exit (optional)
+
                 ScreenOrientation.lockAsync(ScreenOrientation.OrientationLock.PORTRAIT_UP);
             };
         }, [])
     );
 
-    // ------------------- GAME LOGIC -----------------------------
     const loadNewWord = () => {
         const wordList = wordsData.wordsData;
         let randomWord;
@@ -182,7 +179,6 @@ export default function MusicalHangman() {
         </View>
     );
 
-    // DO NOT RENDER UNTIL LANDSCAPE LOCK IS DONE
     if (!orientationReady) return null;
 
     return (

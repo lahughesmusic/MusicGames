@@ -17,15 +17,15 @@ export default function SheetMusic() {
     const { title, category } = useLocalSearchParams();
     const { width, height } = useWindowDimensions();
 
-    // Force landscape orientation
+
     useFocusEffect(
         useCallback(() => {
-            // Lock to landscape
+
             ScreenOrientation.lockAsync(ScreenOrientation.OrientationLock.LANDSCAPE)
                 .catch(console.warn);
 
             return () => {
-                // Unlock to allow portrait elsewhere
+
                 ScreenOrientation.unlockAsync();
             };
         }, [])
@@ -82,7 +82,7 @@ export default function SheetMusic() {
 }
 
 const styles = StyleSheet.create({
-    container: { flex: 1, backgroundColor: 'black' }, // full screen
+    container: { flex: 1, backgroundColor: 'black' },
     background: { flex: 1, width: '100%', height: '100%' },
     image: { width: '100%', height: '100%' },
     fallback: { flex: 1, backgroundColor: '#111', justifyContent: 'center', alignItems: 'center', padding: 20 },

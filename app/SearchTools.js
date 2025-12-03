@@ -1,8 +1,8 @@
 import { useNavigation, useRoute } from '@react-navigation/native';
 import React, { useEffect } from 'react';
 import { FlatList, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import { SearchBar } from 'react-native-paper'; // or your existing SearchBar
-import sortedSongEntries from './Data1'; // make sure this is sorted already
+import { SearchBar } from 'react-native-paper';
+import sortedSongEntries from './Data1';
 
 const ItemSeparatorView = () => (
     <View style={{ height: 0.5, width: '95%', backgroundColor: 'black' }} />
@@ -18,8 +18,8 @@ export default function SearchScreen() {
             headerStyle: { backgroundColor: 'black' },
             headerTintColor: '#FF6B4A',
             headerTitleStyle: { fontWeight: 'bold' },
-            headerBackTitleVisible: false, // hides iOS back text
-            title: 'Search', // header title
+            headerBackTitleVisible: false,
+            title: 'Search',
         });
     }, [navigation]);
 

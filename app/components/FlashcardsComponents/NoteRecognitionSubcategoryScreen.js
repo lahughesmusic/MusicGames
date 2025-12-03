@@ -1,7 +1,7 @@
 import React from 'react';
 import { Alert, ImageBackground, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import image from '../assets/image.jpg';
-import FlashcardData from './FlashcardData'; // ✅ confirm path
+import FlashcardData from './FlashcardData';
 
 const LABEL_TO_KEY = {
     'Bass Clef': 'BassClef',
@@ -17,7 +17,7 @@ export default function NoteRecognitionSubcategoryScreen({ navigation }) {
 
         let cards = [];
         if (key === 'All') {
-            // merge every subcategory in NoteRecognition
+
             const buckets = Object.values(FlashcardData?.NoteRecognition ?? {});
             cards = buckets.filter(Array.isArray).flat();
         } else {
@@ -29,7 +29,7 @@ export default function NoteRecognitionSubcategoryScreen({ navigation }) {
             return;
         }
 
-        // optional: shuffle without mutating originals
+
         const shuffled = cards.slice().sort(() => Math.random() - 0.5);
 
         navigation.navigate('FlashcardViewer', {
@@ -56,8 +56,8 @@ export default function NoteRecognitionSubcategoryScreen({ navigation }) {
 
 const styles = StyleSheet.create({
     container: { flex: 1, justifyContent: 'center', backgroundColor: 'black' },
-    background: { flex: 1, width: '100%', height: '100%', justifyContent: 'center' }, // remove paddingHorizontal
-    innerContainer: { paddingHorizontal: 20, alignItems: 'center' }, // wrap buttons inside
+    background: { flex: 1, width: '100%', height: '100%', justifyContent: 'center' },
+    innerContainer: { paddingHorizontal: 20, alignItems: 'center' },
     invisibleButton: {
         paddingVertical: 10,
         paddingHorizontal: 1,
@@ -79,7 +79,7 @@ const styles = StyleSheet.create({
         width: '40%',
         backgroundColor: '#FF6B4A',
         marginVertical: 50,
-        alignSelf: 'center', // <-- centers the line
+        alignSelf: 'center',
     },
 });
 

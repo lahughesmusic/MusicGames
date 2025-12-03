@@ -28,14 +28,14 @@ export default function SongCategoryScreen() {
     const { width } = useWindowDimensions();
     const isTablet = width >= 768;
 
-    // Lock to portrait when screen is focused
+
     useFocusEffect(
         useCallback(() => {
             ScreenOrientation.lockAsync(ScreenOrientation.OrientationLock.PORTRAIT_UP)
                 .catch(console.warn);
 
             return () => {
-                // Unlock when leaving this screen
+
                 ScreenOrientation.unlockAsync().catch(console.warn);
             };
         }, [])
