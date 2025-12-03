@@ -56,7 +56,8 @@ export default function NoteRecognitionSubcategoryScreen({ navigation }) {
 
 const styles = StyleSheet.create({
     container: { flex: 1, justifyContent: 'center', backgroundColor: 'black' },
-    background: { width: '100%', height: '100%', justifyContent: 'center', paddingHorizontal: 20 },
+    background: { flex: 1, width: '100%', height: '100%', justifyContent: 'center' }, // remove paddingHorizontal
+    innerContainer: { paddingHorizontal: 20, alignItems: 'center' }, // wrap buttons inside
     invisibleButton: {
         paddingVertical: 10,
         paddingHorizontal: 1,
@@ -66,7 +67,7 @@ const styles = StyleSheet.create({
         color: '#FF6B4A',
         fontFamily: 'HelveticaNeue-Light',
         fontWeight: '100',
-        fontSize: 50, // Now this will render full size
+        fontSize: 50,
         textAlign: 'center',
         textShadowColor: 'grey',
         textShadowOffset: { width: 1, height: 1 },
@@ -74,22 +75,11 @@ const styles = StyleSheet.create({
         transform: [{ scaleY: 1.2 }],
     },
     divider: {
-        height: 2,             // thickness of the line
-        width: '40%',          // length of the line
-        backgroundColor: '#FF6B4A', // matches your text color
+        height: 2,
+        width: '40%',
+        backgroundColor: '#FF6B4A',
         marginVertical: 50,
-        alignSelf: 'center'  // spacing between lines
-    },
-    buttonTablet: {
-        color: '#FF6B4A',
-        fontFamily: 'HelveticaNeue-Light',
-        fontWeight: '100',
-        fontSize: 100, // Now this will render full size
-        textAlign: 'center',
-        textShadowColor: 'grey',
-        textShadowOffset: { width: 1, height: 1 },
-        textShadowRadius: 1,
-        transform: [{ scaleY: 1.2 }],
-        // Remove width: 300 so text isn't constrained
+        alignSelf: 'center', // <-- centers the line
     },
 });
+

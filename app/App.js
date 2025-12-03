@@ -23,9 +23,36 @@ export default function App() {
       }}
     >
       <Stack.Screen name="FilterScreen" component={FilterScreen} />
-      <Stack.Screen name="SongCategoryScreen" component={SongCategoryScreen} />
-      <Stack.Screen name="Search" component={Search} />
-      <Stack.Screen name="SheetMusic" component={SheetMusic} />
+      <Stack.Screen name="SongCategoryScreen" component={SongCategoryScreen} options={{
+        headerShown: true,
+        headerStyle: { backgroundColor: 'black' },
+        headerTintColor: '#FF6B4A',
+        headerBackTitleVisible: false,
+        headerTitle: '',
+        gestureEnabled: true,
+      }} />
+      <Stack.Screen
+        name="Search"
+        component={Search}
+        options={{
+          headerShown: true,                // show the header
+          headerStyle: { backgroundColor: 'black' },
+          headerTintColor: '#FF6B4A',       // back button color
+          headerBackTitleVisible: false,    // hide iOS back text
+          headerTitle: '',                   // no title
+          gestureEnabled: true,
+        }}
+      />
+      <Stack.Screen name="SheetMusic" component={SheetMusic}
+        options={{
+          headerShown: true,                // show the header
+          headerStyle: { backgroundColor: 'black' },
+          headerTintColor: '#FF6B4A',       // back button color
+          headerBackTitleVisible: false,    // hide iOS back text
+          headerTitle: '',                   // no title
+          gestureEnabled: true,
+        }}
+      />
       <Stack.Screen
         name="MusicalHangman"
         component={MusicalHangman}
@@ -38,8 +65,24 @@ export default function App() {
           gestureEnabled: true,
         }}
       />
-      <Stack.Screen name="NoteRecognitionSubcategoryScreen" component={NoteRecognitionSubcategoryScreen} />
-      <Stack.Screen name="FlashcardViewer" component={FlashcardViewer} />
+      <Stack.Screen name="NoteRecognitionSubcategoryScreen" component={NoteRecognitionSubcategoryScreen}
+        options={{
+          headerShown: true,                // show the header
+          headerStyle: { backgroundColor: 'black' },
+          headerTintColor: '#FF6B4A',       // back button color
+          headerBackTitleVisible: false,    // hide iOS back text
+          headerTitle: '',                   // no title
+          gestureEnabled: true,
+        }} />
+      <Stack.Screen name="FlashcardViewer" component={FlashcardViewer}
+        options={{
+          headerShown: true,                // show the header
+          headerStyle: { backgroundColor: 'black' },
+          headerTintColor: '#FF6B4A',       // back button color
+          headerBackTitleVisible: false,    // hide iOS back text
+          headerTitle: '',                   // no title
+          gestureEnabled: true,
+        }} />
     </Stack.Navigator>
   );
 }

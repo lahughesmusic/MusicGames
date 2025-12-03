@@ -1,5 +1,7 @@
+// SheetMusic.tsx
+import { HeaderBackButton } from '@react-navigation/elements'; // Back button
 import { useFocusEffect } from '@react-navigation/native';
-import { useLocalSearchParams } from 'expo-router';
+import { useLocalSearchParams, useRouter } from 'expo-router';
 import * as ScreenOrientation from 'expo-screen-orientation';
 import React, { useCallback } from 'react';
 import {
@@ -16,6 +18,7 @@ import bgImage from './assets/image.jpg';
 import songEntries from './Data1';
 
 export default function SheetMusic() {
+    const router = useRouter();
     const { title, category } = useLocalSearchParams();
     const { width, height } = useWindowDimensions();
 
@@ -53,7 +56,14 @@ export default function SheetMusic() {
     }
 
     return (
-        <ImageBackground source={bgImage} style={styles.background}>
+        <ImageBackground source={bgImage} style={[styles.background, { paddingTop: 40 }]}>
+            {/* Back button */}
+            <HeaderBackButton
+                tintColor="#FF6B4A"
+                onPress={() => router.back()}
+                style={{ marginLeft: 10, marginBottom: 10 }}
+            />
+
             <ScrollView
                 style={{ flex: 1 }}
                 contentContainerStyle={{ alignItems: 'center', justifyContent: 'center' }}

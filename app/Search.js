@@ -1,7 +1,9 @@
-// app/Search.js   ← Using react-native-elements SearchBar + full background
-
+// Search.tsx
+import { HeaderBackButton } from '@react-navigation/elements'; // Back button
+import { useFocusEffect } from '@react-navigation/native';
 import { useLocalSearchParams, useRouter } from "expo-router";
-import React, { useState } from "react";
+import * as ScreenOrientation from 'expo-screen-orientation';
+import React, { useCallback, useState } from "react";
 import {
     FlatList,
     ImageBackground,
@@ -22,6 +24,14 @@ const sortedSongEntries = [...songEntries]
 export default function Search() {
     const router = useRouter();
     const { category } = useLocalSearchParams();
+
+    // Force portrait mode whenever this screen is focused
+    useFocusEffect(
+        useCallback(() => {
+            ScreenOrientation.lockAsync(ScreenOrientation.OrientationLock.PORTRAIT_UP);
+            return () => ScreenOrientation.unlockAsync();
+        }, [])
+    );
 
     const initialList =
         category && category !== "Show All"
@@ -66,8 +76,14 @@ export default function Search() {
     return (
         <ImageBackground source={bgImage} style={styles.background} resizeMode="cover">
             <View style={styles.overlay}>
-                {/* react-native-elements SearchBar — beautiful & dark */}
-                {/* react-native-elements SearchBar — beautiful & dark, NO QUESTION MARK */}
+                {/* Back button */}
+                <HeaderBackButton
+                    tintColor="#FF6B4A"
+                    onPress={() => router.back()}
+                    style={{ marginLeft: 10, marginBottom: 10 }}
+                />
+
+                {/* Search bar */}
                 <SearchBar
                     placeholder="Search songs..."
                     value={searchValue}
@@ -82,19 +98,14 @@ export default function Search() {
                     inputContainerStyle={styles.inputContainer}
                     inputStyle={styles.input}
                     placeholderTextColor="#aaa"
-
-                    // ← THIS FIXES THE QUESTION MARK: Custom search icon component
-                    searchIcon={
-                        () => (
-                            <Icon
-                                name="search"
-                                type="material"
-                                color="#FF6B4A"
-                                size={26}
-                            />
-                        )
-                    }
-
+                    searchIcon={() => (
+                        <Icon
+                            name="search"
+                            type="material"
+                            color="#FF6B4A"
+                            size={26}
+                        />
+                    )}
                     clearIcon={{ color: "#FF6B4A", size: 26 }}
                     cancelIcon={{ color: "#FF6B4A" }}
                 />
