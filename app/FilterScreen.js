@@ -2,12 +2,15 @@ import { useFocusEffect } from '@react-navigation/native';
 import * as ScreenOrientation from 'expo-screen-orientation';
 import React from 'react';
 import {
-    ImageBackground, StyleSheet, Text,
-    TouchableOpacity, useWindowDimensions, View
+    ImageBackground,
+    StyleSheet,
+    Text,
+    TouchableOpacity,
+    useWindowDimensions,
+    View
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import image from './assets/image.jpg';
-
-
 
 const homeCategories = ['Songs', 'Musical Hangman', 'Flashcards'];
 
@@ -15,7 +18,7 @@ export default function FilterScreen({ navigation }) {
     const { width } = useWindowDimensions();
     const isTablet = width >= 768;
 
-    // 🔒 Lock screen to portrait mode when focused
+    // Lock portrait mode
     useFocusEffect(
         React.useCallback(() => {
             ScreenOrientation.lockAsync(ScreenOrientation.OrientationLock.PORTRAIT_UP);
@@ -32,8 +35,9 @@ export default function FilterScreen({ navigation }) {
             navigation.navigate('SongCategoryScreen');
         }
     };
+
     return (
-        <View style={styles.container}>
+        <SafeAreaView style={styles.safeArea}>
             <ImageBackground source={image} resizeMode="cover" style={styles.background}>
                 {homeCategories.map((cat, index) => (
                     <React.Fragment key={cat}>
@@ -52,16 +56,12 @@ export default function FilterScreen({ navigation }) {
                     </React.Fragment>
                 ))}
             </ImageBackground>
-        </View>
+        </SafeAreaView>
     );
 }
 
 const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        justifyContent: 'center',
-        backgroundColor: 'black',
-    },
+    safeArea: { flex: 1, backgroundColor: 'black' },
     background: {
         flex: 1,
         width: '100%',
@@ -77,28 +77,26 @@ const styles = StyleSheet.create({
     buttonTablet: {
         paddingVertical: 12,
         paddingHorizontal: 20,
-        // Remove width: 300 so text isn't constrained
     },
-    // ['#4EEAF6', '#FF6B4A', '#AEE637',]
     buttonText: {
         color: '#FF6B4A',
         fontFamily: 'HelveticaNeue-Light',
         fontWeight: '100',
-        fontSize: 50, // Now this will render full size
+        fontSize: 50,
         textAlign: 'center',
         textShadowColor: 'grey',
         textShadowOffset: { width: 1, height: 1 },
         textShadowRadius: 1,
         transform: [{ scaleY: 1.3 }],
     },
-
     buttonTextTablet: {
         fontSize: 100,
     },
     divider: {
-        height: 2,             // thickness of the line
-        width: '60%',          // length of the line
-        backgroundColor: '#FF6B4A', // matches your text color
-        marginVertical: 50,    // spacing between lines
+        height: 2,
+        width: '60%',
+        backgroundColor: '#FF6B4A',
+        marginVertical: 50,
+        alignSelf: 'center', // centers the divider
     },
 });

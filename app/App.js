@@ -14,12 +14,15 @@ const Stack = createNativeStackNavigator();
 export default function App() {
   return (
     <Stack.Navigator
+
       initialRouteName="FilterScreen"
       screenOptions={{
         headerStyle: { backgroundColor: 'black' },
         headerTintColor: '#FF6B4A',       // back button color
         headerBackTitleVisible: true,    // hides iOS back text
         headerTitle: "",                  // removes the title
+        headerShown: false,           // hide the header completely
+        contentStyle: { flex: 1 },
       }}
     >
       <Stack.Screen name="FilterScreen" component={FilterScreen} />
