@@ -1,17 +1,12 @@
-// SheetMusic.tsx
-import { HeaderBackButton } from '@react-navigation/elements'; // Back button
+import { HeaderBackButton } from '@react-navigation/elements';
 import { useFocusEffect } from '@react-navigation/native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import * as ScreenOrientation from 'expo-screen-orientation';
 import React, { useCallback } from 'react';
 import {
     Image,
-    ImageBackground,
-    ScrollView,
-    StyleSheet,
-    Text,
-    useWindowDimensions,
-    View
+    ImageBackground, Platform, ScrollView, StatusBar, StyleSheet,
+    Text, useWindowDimensions, View
 } from 'react-native';
 
 import bgImage from './assets/image.jpg';
@@ -25,8 +20,14 @@ export default function SheetMusic() {
     // Force landscape orientation
     useFocusEffect(
         useCallback(() => {
-            ScreenOrientation.lockAsync(ScreenOrientation.OrientationLock.LANDSCAPE);
-            return () => ScreenOrientation.unlockAsync();
+            // Lock to landscape
+            ScreenOrientation.lockAsync(ScreenOrientation.OrientationLock.LANDSCAPE)
+                .catch(console.warn);
+
+            return () => {
+                // Unlock to allow portrait elsewhere
+                ScreenOrientation.unlockAsync();
+            };
         }, [])
     );
 
@@ -38,7 +39,6 @@ export default function SheetMusic() {
             const songCat = (song.category || '').toLowerCase().trim();
             const searchTitle = (title || '').toString().toLowerCase().trim();
             const searchCat = (category || '').toString().toLowerCase().trim();
-
             return songTitle === searchTitle && songCat === searchCat;
         });
 
@@ -56,37 +56,35 @@ export default function SheetMusic() {
     }
 
     return (
-        <ImageBackground source={bgImage} style={[styles.background, { paddingTop: 40 }]}>
-            {/* Back button */}
-            <HeaderBackButton
-                tintColor="#FF6B4A"
-                onPress={() => router.back()}
-                style={{ marginLeft: 10, marginBottom: 10 }}
-            />
+        <View style={styles.container}>
+            <StatusBar hidden={true} />
+            <ImageBackground source={bgImage} style={styles.background} resizeMode="stretch">
+                <HeaderBackButton
+                    tintColor="#FF6B4A"
+                    onPress={() => router.back()}
+                    style={{ marginLeft: 10, marginBottom: 10 }}
+                />
 
-            <ScrollView
-                style={{ flex: 1 }}
-                contentContainerStyle={{ alignItems: 'center', justifyContent: 'center' }}
-            >
-                {images.map((img, index) => (
-                    <View key={index} style={{ width, height: height - 50 }}>
-                        <Image source={img} style={styles.image} resizeMode="contain" />
-                    </View>
-                ))}
-            </ScrollView>
-        </ImageBackground>
+                <ScrollView
+                    style={{ flex: 1 }}
+                    contentContainerStyle={{ alignItems: 'center', justifyContent: 'center' }}
+                    bounces={false}
+                >
+                    {images.map((img, index) => (
+                        <View key={index} style={{ width, height: height - (Platform.OS === 'ios' ? 0 : 0) }}>
+                            <Image source={img} style={styles.image} resizeMode="contain" />
+                        </View>
+                    ))}
+                </ScrollView>
+            </ImageBackground>
+        </View>
     );
 }
 
 const styles = StyleSheet.create({
-    background: { flex: 1 },
+    container: { flex: 1, backgroundColor: 'black' }, // full screen
+    background: { flex: 1, width: '100%', height: '100%' },
     image: { width: '100%', height: '100%' },
-    fallback: {
-        flex: 1,
-        backgroundColor: '#111',
-        justifyContent: 'center',
-        alignItems: 'center',
-        padding: 20,
-    },
+    fallback: { flex: 1, backgroundColor: '#111', justifyContent: 'center', alignItems: 'center', padding: 20 },
     fallbackText: { color: '#fff', fontSize: 24, textAlign: 'center' },
 });

@@ -1,11 +1,10 @@
-// app/SongCategoryScreen.tsx
+import { useFocusEffect } from '@react-navigation/native';
 import { useRouter } from 'expo-router';
 import * as ScreenOrientation from 'expo-screen-orientation';
-import React, { useEffect } from 'react';
+import React, { useCallback } from 'react';
 import {
     ImageBackground,
-    ScrollView,
-    StyleSheet,
+    ScrollView, StatusBar, StyleSheet,
     Text,
     TouchableOpacity,
     useWindowDimensions,
@@ -29,11 +28,18 @@ export default function SongCategoryScreen() {
     const { width } = useWindowDimensions();
     const isTablet = width >= 768;
 
-    // Lock to portrait
-    useEffect(() => {
-        ScreenOrientation.lockAsync(ScreenOrientation.OrientationLock.PORTRAIT_UP);
-        return () => ScreenOrientation.unlockAsync();
-    }, []);
+    // Lock to portrait when screen is focused
+    useFocusEffect(
+        useCallback(() => {
+            ScreenOrientation.lockAsync(ScreenOrientation.OrientationLock.PORTRAIT_UP)
+                .catch(console.warn);
+
+            return () => {
+                // Unlock when leaving this screen
+                ScreenOrientation.unlockAsync().catch(console.warn);
+            };
+        }, [])
+    );
 
     const handlePress = (category) => {
         const encodedCategory = encodeURIComponent(category);
@@ -41,35 +47,39 @@ export default function SongCategoryScreen() {
     };
 
     return (
-        <ImageBackground source={image} resizeMode="cover" style={styles.background}>
-            <ScrollView contentContainerStyle={styles.scrollContainer}>
-                {songCategories.map((cat, index) => (
-                    <React.Fragment key={cat}>
-                        <TouchableOpacity
-                            style={[styles.invisibleButton, isTablet && styles.buttonTablet]}
-                            onPress={() => handlePress(cat)}
-                        >
-                            <Text
-                                style={[styles.buttonText, isTablet && styles.buttonTextTablet]}
-                                numberOfLines={2}
-                                adjustsFontSizeToFit
-                                minimumFontScale={0.5}
+        <View style={styles.container}>
+            <StatusBar hidden={false} />
+            <ImageBackground source={image} resizeMode="cover" style={styles.background}>
+                <ScrollView contentContainerStyle={styles.scrollContainer}>
+                    {songCategories.map((cat, index) => (
+                        <React.Fragment key={cat}>
+                            <TouchableOpacity
+                                style={[styles.invisibleButton, isTablet && styles.buttonTablet]}
+                                onPress={() => handlePress(cat)}
                             >
-                                {cat}
-                            </Text>
-                        </TouchableOpacity>
+                                <Text
+                                    style={[styles.buttonText, isTablet && styles.buttonTextTablet]}
+                                    numberOfLines={2}
+                                    adjustsFontSizeToFit
+                                    minimumFontScale={0.5}
+                                >
+                                    {cat}
+                                </Text>
+                            </TouchableOpacity>
 
-                        {index < songCategories.length - 1 && (
-                            <View style={styles.divider} />
-                        )}
-                    </React.Fragment>
-                ))}
-            </ScrollView>
-        </ImageBackground>
+                            {index < songCategories.length - 1 && (
+                                <View style={styles.divider} />
+                            )}
+                        </React.Fragment>
+                    ))}
+                </ScrollView>
+            </ImageBackground>
+        </View>
     );
 }
 
 const styles = StyleSheet.create({
+    container: { flex: 1, backgroundColor: 'black' },
     background: { flex: 1 },
     scrollContainer: {
         flexGrow: 1,
@@ -98,9 +108,7 @@ const styles = StyleSheet.create({
         textShadowRadius: 4,
         transform: [{ scaleY: 1.4 }],
     },
-    buttonTextTablet: {
-        fontSize: 48,
-    },
+    buttonTextTablet: { fontSize: 48 },
     divider: {
         height: 2,
         width: '15%',
