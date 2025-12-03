@@ -47,24 +47,45 @@ export default function MusicalHangman() {
     const [gameWon, setGameWon] = useState(false);
     const [lastWord, setLastWord] = useState('');
     const [textColor, setTextColor] = useState('#FFD93D');
-    const [orientationHack, setOrientationHack] = useState(0);
 
-    // LOCK LANDSCAPE
+    // NEW — block render until orientation fully locked
+    const [orientationReady, setOrientationReady] = useState(false);
+
+    // -------------- FIXED ORIENTATION HANDLING -----------------
     useFocusEffect(
         useCallback(() => {
-            ScreenOrientation.lockAsync(ScreenOrientation.OrientationLock.LANDSCAPE)
-                .then(() => setOrientationHack(prev => prev + 1))
-                .catch(err => console.warn('Orientation lock failed:', err));
+            let isActive = true;
+
+            const doLock = async () => {
+                try {
+                    await ScreenOrientation.lockAsync(ScreenOrientation.OrientationLock.LANDSCAPE);
+
+                    // iPadOS + TestFlight require a small delay before layout becomes stable
+                    setTimeout(() => {
+                        if (isActive) setOrientationReady(true);
+                    }, 150);
+                } catch (err) {
+                    console.warn('Orientation lock failed:', err);
+                    if (isActive) setOrientationReady(true);
+                }
+            };
+
+            setOrientationReady(false);
+            doLock();
 
             return () => {
+                isActive = false;
+                // Unlock on exit (optional)
                 ScreenOrientation.lockAsync(ScreenOrientation.OrientationLock.PORTRAIT_UP);
             };
         }, [])
     );
 
+    // ------------------- GAME LOGIC -----------------------------
     const loadNewWord = () => {
         const wordList = wordsData.wordsData;
         let randomWord;
+
         do {
             randomWord = wordList[Math.floor(Math.random() * wordList.length)];
         } while (randomWord.toLowerCase() === lastWord.toLowerCase());
@@ -160,6 +181,9 @@ export default function MusicalHangman() {
             </View>
         </View>
     );
+
+    // DO NOT RENDER UNTIL LANDSCAPE LOCK IS DONE
+    if (!orientationReady) return null;
 
     return (
         <ImageBackground source={cardBackground} style={styles.cardBackground} resizeMode="stretch">
